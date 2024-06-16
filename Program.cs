@@ -64,12 +64,7 @@ class Program
     }
     static async Task WelcomeMsg()
     {
-
-        //Message sentMessage = await _botClient.SendTextMessageAsync(
-        //chatId: chatId,
-        //    text: "Choose a response",
-        //    replyMarkup: replyKeyboardMarkup,
-        //    cancellationToken: cancellationToken);
+        SentKeyBoard();
     }
 
     //Обработчик введенного пользователем текста
@@ -87,10 +82,10 @@ class Program
 
         WriteLine($"Received a '{messageText}' message in chat {chatId}.");
 
-        if (message.Text == "hi")
+        if (message.Text == "/start")
         {
-            await SentSimpleMsg("кукусики");
-            await SentKeyBoard();
+            WelcomeMsg();
+            SentEcho();
         }
 
         //пока сделаю обнуление сообщения, мб потом уберу
@@ -98,14 +93,18 @@ class Program
 
 
 
-        //// Echo  для теста
-        //Message sentMessage = await _botClient.SendTextMessageAsync(
-        //    chatId: chatId,
-        //    text: "You said:\n" + messageText,
-        //    cancellationToken: cancellationToken);
+        
     }
 
-
+    //простое эхо сообщение
+    static async Task SentEcho()
+    {
+        // Echo  для теста
+        Message sentMessage = await _botClient.SendTextMessageAsync(
+            chatId: _messageFromUser.Chat.Id,
+            text: "You said:\n" + _messageFromUser.Text,
+            cancellationToken: _cancellationToken);
+    }
     static async Task SentKeyBoard( )
     {
         //if (keyboardMarkup == null) return;

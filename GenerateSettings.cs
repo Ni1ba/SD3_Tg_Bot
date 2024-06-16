@@ -8,19 +8,26 @@ namespace SD3_Tg_Bot
     internal class GenerateSettings
     {
         private static readonly HttpClient client = new HttpClient();
-        public string prompt { get; set; }
-        public string negativePrompt { get; set; }
-        public int seed { get; set; }
-        public bool randomizeSeed { get; set; }
-        public int width { get; set; }
-        public int height { get; set; }
-        public double guidanceScale { get; set; }
-        public int numInferenceSteps { get; set; }
+        public static string _prompt { get; set; }
+        public static string? _negativePrompt { get; set; }
+        public static int _seed { get; set; }
+        public static bool _randomizeSeed { get; set; }
+        public static int _width { get; set; }
+        public static int _height { get; set; }
+        public static double _guidanceScale { get; set; }
+        public static int _numInferenceSteps { get; set; }
 
 
         public GenerateSettings() 
-        { 
-        
+        {
+            _prompt = "Hello!!";
+            _negativePrompt = "";
+            _seed = 0;
+            _randomizeSeed = true;
+            _width = 1024;
+            _height = 1024;
+            _guidanceScale = 5.0;
+            _numInferenceSteps = 20;
         }
 
         public static async Task<string> GenerateByPrompt()
@@ -28,14 +35,14 @@ namespace SD3_Tg_Bot
             var url = "http://127.0.0.1:5000/predict"; // Убедитесь, что URL правильный
             var data = new
             {
-                prompt = "Hello!!",
-                negative_prompt = "Hello!!",
-                seed = 0,
-                randomize_seed = true,
-                width = 1024,
-                height = 1024,
-                guidance_scale = 5,
-                num_inference_steps = 28
+                prompt = _prompt,
+                negative_prompt = _negativePrompt,
+                seed = _seed,
+                randomize_seed = _randomizeSeed,
+                width = _width,
+                height = _height,
+                guidance_scale = _guidanceScale,
+                num_inference_steps = _numInferenceSteps
             };
 
             var response = await CallApi(url, data);
