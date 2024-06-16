@@ -1,22 +1,13 @@
-﻿using System;
-using System.Net.Http;
+﻿using Newtonsoft.Json;
 using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-
+using System.Threading;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using System.IO;
-
-
-using static SD3_Tg_Bot.KeyBoards;
-using static System.Console;
-using static System.IO.Path;
-using System.Threading;
 using Telegram.Bot.Types.ReplyMarkups;
+using static System.Console;
 
 class Program
 {
@@ -30,7 +21,7 @@ class Program
 
 
     private static readonly HttpClient client = new HttpClient();
- 
+
 
 
     static async Task Main(string[] args)
@@ -42,7 +33,7 @@ class Program
         _botClient = new TelegramBotClient(_token);
         //хз че за отмена токена, но без нее не запускается
         _cancellationTokenSource = new();
-        _cancellationToken= _cancellationTokenSource.Token;
+        _cancellationToken = _cancellationTokenSource.Token;
         _update = new Update();
         //пока тоже непонятно зачем надо,но в доках было
         var me = await _botClient.GetMeAsync();
@@ -59,7 +50,7 @@ class Program
             cancellationToken: _cancellationTokenSource.Token
             );
 
-        
+
         WriteLine($"Start listening for @{me.Username}");
         ReadLine();
         //WelcomeMsg();
@@ -68,7 +59,7 @@ class Program
         _cancellationTokenSource.Cancel();
 
 
-        
+
         ////usePrompt();
     }
     static async Task WelcomeMsg()
@@ -99,6 +90,7 @@ class Program
         if (message.Text == "hi")
         {
             await SentSimpleMsg("кукусики");
+            await SentKeyBoard();
         }
 
         //пока сделаю обнуление сообщения, мб потом уберу
@@ -114,6 +106,23 @@ class Program
     }
 
 
+    static async Task SentKeyBoard( )
+    {
+        //if (keyboardMarkup == null) return;
+        ReplyKeyboardMarkup replyKeyboardMarkup = new(new[]
+            {
+                new KeyboardButton[] { "Help me", "Call me ☎️" },
+            })
+        {
+            ResizeKeyboard = true
+        };
+
+        Message sentMessage = await _botClient.SendTextMessageAsync(
+                chatId: _messageFromUser.Chat.Id,
+                text: "Choose a response",
+                replyMarkup: replyKeyboardMarkup,
+                cancellationToken: _cancellationToken);
+    }
     //отправка простого сообщения пользователю
     static async Task SentSimpleMsg(string messageToUser)
     {
@@ -127,7 +136,7 @@ class Program
             text: messageToUser,
             cancellationToken: _cancellationToken
             );
-       
+
     }
 
     static Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
