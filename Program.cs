@@ -24,6 +24,10 @@ class Program
     public static string _token;
     public static CancellationTokenSource _cancellationTokenSource;
     public static CancellationToken _cancellationToken;
+    public static Update _update;
+    public static Message _messageFromUser;
+    public static Message _messageToUser;
+
 
     private static readonly HttpClient client = new HttpClient();
  
@@ -38,6 +42,8 @@ class Program
         _botClient = new TelegramBotClient(_token);
         //хз че за отмена токена, но без нее не запускается
         _cancellationTokenSource = new();
+        _cancellationToken= _cancellationTokenSource.Token;
+        _update = new Update();
         //пока тоже непонятно зачем надо,но в доках было
         var me = await _botClient.GetMeAsync();
         //просто пока тоже должно быть
@@ -53,9 +59,9 @@ class Program
             cancellationToken: _cancellationTokenSource.Token
             );
 
-
-        Console.WriteLine($"Start listening for @{me.Username}");
-        Console.ReadLine();
+        
+        WriteLine($"Start listening for @{me.Username}");
+        ReadLine();
         //WelcomeMsg();
 
         //остановка бота
@@ -78,6 +84,7 @@ class Program
     //Обработчик введенного пользователем текста
     static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
+        _messageFromUser = update.Message;
         // Only process Message updates: https://core.telegram.org/bots/api#message
         if (update.Message is not { } message)
             return;
@@ -91,10 +98,15 @@ class Program
 
         if (message.Text == "hi")
         {
-            SentSimpleMsg(message,"кукусики");
+            await SentSimpleMsg("кукусики");
         }
 
-        //// Echo  
+        //пока сделаю обнуление сообщения, мб потом уберу
+        _messageFromUser = null;
+
+
+
+        //// Echo  для теста
         //Message sentMessage = await _botClient.SendTextMessageAsync(
         //    chatId: chatId,
         //    text: "You said:\n" + messageText,
@@ -103,20 +115,19 @@ class Program
 
 
     //отправка простого сообщения пользователю
-    static async Task SentSimpleMsg(Message messageFromUser, string messageToUser)
+    static async Task SentSimpleMsg(string messageToUser)
     {
-        var chatId = messageFromUser.Chat.Id;
+        var chatId = _messageFromUser.Chat.Id;
         Message sentMessage = new();
-        
-        //WriteLine($"Received a '{messageFromUser.Text}' message in chat {chatId}.");
 
         sentMessage.Text = messageToUser;
+
         await _botClient.SendTextMessageAsync(
             chatId: chatId,
             text: messageToUser,
             cancellationToken: _cancellationToken
             );
-
+       
     }
 
     static Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
