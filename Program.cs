@@ -65,7 +65,8 @@ class Program
     }
     static async Task WelcomeMsg()
     {
-        SentKeyBoard();
+        DbCreate();
+        //SentKeyBoard();
     }
 
     //Обработчик введенного пользователем текста
@@ -134,6 +135,33 @@ class Program
             );
 
 
+    }
+
+    static async Task DbCreate()
+    {
+
+        // добавление данных
+        using ( DB.ApplicationContext db = new DB.ApplicationContext())
+        {
+            // создаем два объекта User
+            DB.User user1 = new DB.User { Name = "Tom", Age = 33 };
+            DB.User user2 = new DB.User { Name = "Alice", Age = 26 };
+
+            // добавляем их в бд
+            db.Users.AddRange(user1, user2);
+            db.SaveChanges();
+        }
+        // получение данных
+        using (DB.ApplicationContext db = new DB.ApplicationContext())
+        {
+            // получаем объекты из бд и выводим на консоль
+            var users = db.Users.ToList();
+            Console.WriteLine("Users list:");
+            foreach (DB.User u in users)
+            {
+                Console.WriteLine($"{u.Id}.{u.Name} - {u.Age}");
+            }
+        }
     }
 
     static Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
