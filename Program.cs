@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SD3_Tg_Bot;
 using System.Text;
 using System.Threading;
 using Telegram.Bot;
@@ -85,7 +86,7 @@ class Program
         if (message.Text == "/start")
         {
             WelcomeMsg();
-            SentEcho();
+            //SentEcho();
         }
 
         //пока сделаю обнуление сообщения, мб потом уберу
@@ -107,20 +108,16 @@ class Program
     }
     static async Task SentKeyBoard( )
     {
-        //if (keyboardMarkup == null) return;
-        ReplyKeyboardMarkup replyKeyboardMarkup = new(new[]
-            {
-                new KeyboardButton[] { "Help me", "Call me ☎️" },
-            })
-        {
-            ResizeKeyboard = true
-        };
+        KeyBoards kb = new KeyBoards();
+ 
 
         Message sentMessage = await _botClient.SendTextMessageAsync(
                 chatId: _messageFromUser.Chat.Id,
                 text: "Choose a response",
-                replyMarkup: replyKeyboardMarkup,
+                replyMarkup: kb.InlineMainMenuKeyBoard(),
                 cancellationToken: _cancellationToken);
+        WriteLine($"Message ID: {sentMessage.MessageId}");
+        
     }
     //отправка простого сообщения пользователю
     static async Task SentSimpleMsg(string messageToUser)
@@ -135,6 +132,7 @@ class Program
             text: messageToUser,
             cancellationToken: _cancellationToken
             );
+
 
     }
 
