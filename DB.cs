@@ -24,9 +24,17 @@ namespace SD3_Tg_Bot
         {
             using (ApplicationContext db = new ApplicationContext())
             {
-                if (!await UserExistsInDb())
+                User existUser = new();
+                if (await UserExistsInDb())
                 {
-
+                    existUser= await GetUser();
+                    existUser.TgMenuMessageId =_messageBot.From.Id;
+                    existUser.TgUserName =_messageUser.From.Username;
+                    existUser.TgUserId= _messageUser.From.Id;
+                    existUser.DateTimeMessageMenu =_messageBot.Date;
+                    db.Update(existUser);
+                    await db.SaveChangesAsync();
+                    WriteLine("Данные юзера обновлены в бд");
                 }
                 else
                 {
@@ -95,7 +103,7 @@ namespace SD3_Tg_Bot
                 }
                 else
                 {
-                    WriteLine($"User {_messageUser.From.Username} уже существует в бд");
+                    WriteLine($"User {_messageUser.From.Username} уже существует в бд, добавление не произошло");
                 }
 
             }
