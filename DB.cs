@@ -26,22 +26,32 @@ namespace SD3_Tg_Bot
         //добавление пользователя в базу
         public async Task AddNewUser()
         {
-            User newUser = new();
-            //проверка пользователя на существование в бд
-            if (! await UserExists())
+            using (ApplicationContext db = new ApplicationContext())
             {
-                //проверка на null перед добавлением в бд
-                if (_messageUser?.From?.Id != null && _messageUser?.From?.Username!=null )
+                User newUser = new();
+                //проверка пользователя на существование в бд
+                if (!await UserExists())
                 {
-                    //TODO: пока не продумал логику отслеживания чата с меню, надо будет переделывать
-                    newUser.TgMenuMessageId = 1;
-                    newUser.TgUserId = _messageUser.From.Id;
-                    newUser.TgUserName = _messageUser.From.Username;
+                    //проверка на null перед добавлением в бд
+                    if (_messageUser?.From?.Id != null && _messageUser?.From?.Username != null)
+                    {
+                        //TODO: пока не продумал логику отслеживания чата с меню, надо будет переделывать
+                        newUser.TgMenuMessageId = 1;
+                        newUser.TgUserId = _messageUser.From.Id;
+                        newUser.TgUserName = _messageUser.From.Username;
+                        db.Users.Add(newUser);
+                        await db.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        WriteLine($"{nameof(UserExists)}  Null");
+                    }
                 }
                 else
                 {
-                    WriteLine($"{nameof(UserExists)}  Null");
+                    WriteLine($"User {newUser.TgUserName} уже существует");
                 }
+
             }
 
         }
