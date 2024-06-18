@@ -10,10 +10,33 @@ namespace SD3_Tg_Bot
     public class DB
     {
         private readonly Message _messageUser;
+        private readonly Message _messageBot;
 
         public DB(Message message) { _messageUser = message; }
+        public DB(Message userMessage,Message botMessage) 
+        {
+            _messageUser = userMessage;
+            _messageBot = botMessage;
+        }
+
+        //обновление данных по юзеру
+        public async Task UpdateUser()
+        {
+            using (ApplicationContext db = new ApplicationContext())
+            {
+                if (!await UserExistsInDb())
+                {
+
+                }
+                else
+                {
+                    WriteLine($"{_messageUser.From.Username} не существует в базе, обновление не выполнено");
+                }
+            }
+        }
+
         //проверка пользователя на наличие в бд
-        private async Task<bool> UserExists()
+        private async Task<bool> UserExistsInDb()
         {
             using (ApplicationContext db = new ApplicationContext())
             {
@@ -31,7 +54,7 @@ namespace SD3_Tg_Bot
             using (ApplicationContext db = new ApplicationContext())
             {
                 User newUser = new();
-                if (await UserExists())
+                if (await UserExistsInDb())
                 {
                     return await db.Users.FindAsync(_messageUser.From.Id);
                 }
@@ -43,6 +66,8 @@ namespace SD3_Tg_Bot
             }
         }
 
+       
+
         //добавление пользователя в базу
         public async Task AddNewUser()
         {
@@ -50,7 +75,7 @@ namespace SD3_Tg_Bot
             {
                 User newUser = new();
                 //проверка пользователя на существование в бд
-                if (!await UserExists())
+                if (!await UserExistsInDb())
                 {
                     //проверка на null перед добавлением в бд
                     if (_messageUser?.From?.Id != null && _messageUser?.From?.Username != null)
@@ -65,7 +90,7 @@ namespace SD3_Tg_Bot
                     }
                     else
                     {
-                        WriteLine($"{nameof(UserExists)}  Null");
+                        WriteLine($"{nameof(UserExistsInDb)}  Null");
                     }
                 }
                 else
