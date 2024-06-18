@@ -68,6 +68,16 @@ class Program
         //TODO: usePrompt();
     }
 
+
+    static async Task SentMenuMessage()
+    {
+        Message sentMessage = await _botClient.SendTextMessageAsync(
+            chatId: _messageFromUser.Chat.Id,
+            text: "Menu",
+            cancellationToken: _cancellationToken);
+        _messageToUser=sentMessage;
+    }
+
     static async Task WelcomeMsg()
     {
         DB myDB = new DB(_messageFromUser);
@@ -76,12 +86,41 @@ class Program
         DB.User mU = new DB.User();
         mU = await myDB.GetUser();
         Write("");
+        //DateTime dt = DateTime.Now;
+        //DateTime dt2= DateTime.Now.AddHours(-48);
+
         if (mU != null) 
         {
-            if (mU.TgMenuMessageId != 0)
+            //TODO: вернуть "!"
+            if (mU.TgMenuMessageId == 0)
             {
                 //проверка по дате, если больше 48 часов, то удаляем
                 //из базы идентификатор и отправляем новый мсж
+                if (mU.DateTimeMessageMenu > DateTime.Now.AddHours(-48))
+                {
+                    //сообщение если нельзя удалить сообщение
+
+                    // отправить новое
+                    SentMenuMessage();
+                    myDB = new DB(_messageFromUser, _messageToUser);
+                    // записать его идентификатор в бд
+                    myDB.UpdateUser();
+                    
+                    Write("");
+                }
+                else
+                {
+                    //собщение можно удалить
+
+                    //TODO: сделать миграцию по смене типа данных у айди меню сообщения на инт
+                    // удаляем сообщение
+                    await _botClient.DeleteMessageAsync(mU.TgUserId,Convert.ToInt32(mU.TgMenuMessageId),_cancellationToken);
+                    // отправить новое
+                    SentMenuMessage();
+                    // записать новое в бд
+                    myDB.UpdateUser();
+
+                }
                 //await _botClient.DeleteMessageAsync(mU.TgUserId,mU.);
             }
         }
