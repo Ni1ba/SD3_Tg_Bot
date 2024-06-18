@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.EntityFrameworkCore.Storage;
+using Newtonsoft.Json;
 using SD3_Tg_Bot;
 using System.Text;
 using System.Threading;
@@ -53,7 +54,17 @@ class Program
 
 
         WriteLine($"Start listening for @{me.Username}");
-        ReadLine();
+        try
+        {
+            // ждем, пока токен отмены не будет вызван
+            await Task.Delay(Timeout.Infinite, _cancellationToken);
+        }
+        catch (TaskCanceledException)
+        {
+            // ожидаем завершения работы при отмене
+            WriteLine("Бот остановлен");
+        }
+
         //WelcomeMsg();
 
         //остановка бота
@@ -144,12 +155,13 @@ class Program
         using ( DB.ApplicationContext db = new DB.ApplicationContext())
         {
             // создаем два объекта User
-            DB.User user1 = new DB.User { TgUserName = "Tom", TgChatId = 33 };
-            DB.User user2 = new DB.User { TgUserName = "Alice", TgChatId = 26 };
+            DB.User user1 = new DB.User { TgUserId = 231,TgUserName = "Tom" };
+            DB.User user2 = new DB.User { TgUserId = 23456,TgUserName = "Alice" };
 
             // добавляем их в бд
             db.Users.AddRange(user1, user2);
             db.SaveChanges();
+            
         }
         // получение данных
         using (DB.ApplicationContext db = new DB.ApplicationContext())
