@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
+using static SD3_Tg_Bot.DB;
 using static System.Console;
 
 namespace SD3_Tg_Bot
@@ -14,14 +15,20 @@ namespace SD3_Tg_Bot
     public class DB
     {
         private readonly Message _messageUser;
-        //private bool _userExist;
+       
         public DB(Message message) { _messageUser = message; }
-
         //проверка пользователя на наличие в бд
         private async Task <bool> UserExists()
         {
-
-            return false;//TODO: реализовать проверку на наличие в бд юзера
+            using (ApplicationContext db = new ApplicationContext())
+            {
+                if (_messageUser?.From?.Id != null)
+                {
+                    if (await db.Users.FindAsync(_messageUser.From.Id) != null)
+                    { return true; }
+                }
+            }
+            return false;
         }
         //добавление пользователя в базу
         public async Task AddNewUser()
@@ -36,11 +43,12 @@ namespace SD3_Tg_Bot
                     if (_messageUser?.From?.Id != null && _messageUser?.From?.Username != null)
                     {
                         //TODO: пока не продумал логику отслеживания чата с меню, надо будет переделывать
-                        newUser.TgMenuMessageId = 1;
+                        newUser.TgMenuMessageId = 0;
                         newUser.TgUserId = _messageUser.From.Id;
                         newUser.TgUserName = _messageUser.From.Username;
                         db.Users.Add(newUser);
                         await db.SaveChangesAsync();
+                        WriteLine($"User {_messageUser.From.Username} добавлен");
                     }
                     else
                     {
@@ -49,7 +57,7 @@ namespace SD3_Tg_Bot
                 }
                 else
                 {
-                    WriteLine($"User {newUser.TgUserName} уже существует");
+                    WriteLine($"User {_messageUser.From.Username} уже существует в бд");
                 }
 
             }
@@ -79,10 +87,6 @@ namespace SD3_Tg_Bot
             {
                 optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=SD3TgBot;Username=postgres;Password=1452");
             }
-
-
-
-            
 
         }
 
