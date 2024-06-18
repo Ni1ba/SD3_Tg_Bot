@@ -1,11 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Telegram.Bot.Types;
 using static SD3_Tg_Bot.DB;
 using static System.Console;
@@ -15,10 +10,10 @@ namespace SD3_Tg_Bot
     public class DB
     {
         private readonly Message _messageUser;
-       
+
         public DB(Message message) { _messageUser = message; }
         //проверка пользователя на наличие в бд
-        private async Task <bool> UserExists()
+        private async Task<bool> UserExists()
         {
             using (ApplicationContext db = new ApplicationContext())
             {
@@ -30,6 +25,24 @@ namespace SD3_Tg_Bot
             }
             return false;
         }
+        //получение пользователя из базы
+        public async Task <User> GetUser()
+        {
+            using (ApplicationContext db = new ApplicationContext())
+            {
+                User newUser = new();
+                if (await UserExists())
+                {
+                    return await db.Users.FindAsync(_messageUser.From.Id);
+                }
+                else
+                {
+                    return null ;
+                }
+
+            }
+        }
+
         //добавление пользователя в базу
         public async Task AddNewUser()
         {
@@ -70,9 +83,9 @@ namespace SD3_Tg_Bot
             [DatabaseGenerated(DatabaseGeneratedOption.None)]
             public long? TgUserId { get; set; }
             public string? TgUserName { get; set; }
-            
+
             public long TgMenuMessageId { get; set; }
-            
+
         }
         public class ApplicationContext : DbContext
         {
