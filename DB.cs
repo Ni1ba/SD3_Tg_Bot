@@ -85,7 +85,7 @@ namespace SD3_Tg_Bot
             public string? TgUserName { get; set; }
 
             public long TgMenuMessageId { get; set; }
-
+            public DateTime DateTimeMessageMenu { get; set; }
         }
         public class ApplicationContext : DbContext
         {
