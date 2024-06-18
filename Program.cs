@@ -144,8 +144,8 @@ class Program
         using ( DB.ApplicationContext db = new DB.ApplicationContext())
         {
             // создаем два объекта User
-            DB.User user1 = new DB.User { Name = "Tom", Age = 33 };
-            DB.User user2 = new DB.User { Name = "Alice", Age = 26 };
+            DB.User user1 = new DB.User { TgUserName = "Tom", TgChatId = 33 };
+            DB.User user2 = new DB.User { TgUserName = "Alice", TgChatId = 26 };
 
             // добавляем их в бд
             db.Users.AddRange(user1, user2);
@@ -159,7 +159,7 @@ class Program
             Console.WriteLine("Users list:");
             foreach (DB.User u in users)
             {
-                Console.WriteLine($"{u.Id}.{u.Name} - {u.Age}");
+                Console.WriteLine($"{u.TgUserId}.{u.TgUserName} ");
             }
         }
     }
