@@ -1,14 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore.Storage;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using SD3_Tg_Bot;
 using System.Text;
-using System.Threading;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
 using static System.Console;
 
 class Program
@@ -106,7 +103,7 @@ class Program
 
         //
 
-        
+
     }
 
     //простое эхо сообщение
@@ -118,10 +115,10 @@ class Program
             text: "You said:\n" + _messageFromUser.Text,
             cancellationToken: _cancellationToken);
     }
-    static async Task SentKeyBoard( )
+    static async Task SentKeyBoard()
     {
         KeyBoards kb = new KeyBoards();
- 
+
 
         Message sentMessage = await _botClient.SendTextMessageAsync(
                 chatId: _messageFromUser.Chat.Id,
@@ -129,7 +126,7 @@ class Program
                 replyMarkup: kb.InlineMainMenuKeyBoard(),
                 cancellationToken: _cancellationToken);
         WriteLine($"Message ID: {sentMessage.MessageId}");
-        
+
     }
     //отправка простого сообщения пользователю
     static async Task SentSimpleMsg(string messageToUser)
@@ -152,16 +149,16 @@ class Program
     {
 
         // добавление данных
-        using ( DB.ApplicationContext db = new DB.ApplicationContext())
+        using (DB.ApplicationContext db = new DB.ApplicationContext())
         {
             // создаем два объекта User
-            DB.User user1 = new DB.User { TgUserId = 231,TgUserName = "Tom" };
-            DB.User user2 = new DB.User { TgUserId = 23456,TgUserName = "Alice" };
+            DB.User user1 = new DB.User { TgUserId = 231, TgUserName = "Tom" };
+            DB.User user2 = new DB.User { TgUserId = 23456, TgUserName = "Alice" };
 
             // добавляем их в бд
             db.Users.AddRange(user1, user2);
             db.SaveChanges();
-            
+
         }
         // получение данных
         using (DB.ApplicationContext db = new DB.ApplicationContext())
