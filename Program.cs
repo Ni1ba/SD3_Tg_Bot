@@ -62,18 +62,37 @@ class Program
             WriteLine("Бот остановлен");
         }
 
-        //WelcomeMsg();
-
         //остановка бота
         _cancellationTokenSource.Cancel();
 
-
-
-        ////usePrompt();
+        //TODO: usePrompt();
     }
+
     static async Task WelcomeMsg()
     {
-        DbCreate();
+        DB myDB = new DB(_messageFromUser);
+        await myDB.AddNewUser();
+        //получение id клавиатуры из базы через пользователя
+        DB.User mU = new DB.User();
+        mU = await myDB.GetUser();
+        Write("");
+        if (mU != null) 
+        {
+            if (mU.TgMenuMessageId != 0)
+            {
+                //проверка по дате, если больше 48 часов, то удаляем
+                //из базы идентификатор и отправляем новый мсж
+                //await _botClient.DeleteMessageAsync(mU.TgUserId,mU.);
+            }
+        }
+
+       //
+        //удаление старого сообщения с клавиатурой
+        //отправка нового сообщения с клавиатурой
+        //запись в базу нового id клавиатуры
+
+
+        //DbCreate();
         //SentKeyBoard();
     }
 
@@ -94,16 +113,10 @@ class Program
 
         if (message.Text == "/start")
         {
-            WelcomeMsg();
-            //SentEcho();
+            await WelcomeMsg();
         }
-
         //пока сделаю обнуление сообщения, мб потом уберу
         _messageFromUser = null;
-
-        //
-
-
     }
 
     //простое эхо сообщение
@@ -144,35 +157,7 @@ class Program
 
 
     }
-
-    static async Task DbCreate()
-    {
-
-        // добавление данных
-        using (DB.ApplicationContext db = new DB.ApplicationContext())
-        {
-            // создаем два объекта User
-            DB.User user1 = new DB.User { TgUserId = 231, TgUserName = "Tom" };
-            DB.User user2 = new DB.User { TgUserId = 23456, TgUserName = "Alice" };
-
-            // добавляем их в бд
-            db.Users.AddRange(user1, user2);
-            db.SaveChanges();
-
-        }
-        // получение данных
-        using (DB.ApplicationContext db = new DB.ApplicationContext())
-        {
-            // получаем объекты из бд и выводим на консоль
-            var users = db.Users.ToList();
-            Console.WriteLine("Users list:");
-            foreach (DB.User u in users)
-            {
-                Console.WriteLine($"{u.TgUserId}.{u.TgUserName} ");
-            }
-        }
-    }
-
+        
     static Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
     {
         var ErrorMessage = exception switch

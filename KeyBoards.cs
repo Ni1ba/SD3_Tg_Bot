@@ -18,6 +18,7 @@ namespace SD3_Tg_Bot
             return replyKeyboardMarkup;
         }
 
+        //клавиатура с главным меню
         public InlineKeyboardMarkup InlineMainMenuKeyBoard()
         {
             InlineKeyboardMarkup inlineKeyboard = new(new[]
