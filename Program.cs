@@ -68,7 +68,7 @@ class Program
         //TODO: usePrompt();
     }
 
-
+    
     static async Task SentMenuMessage()
     {
         Message sentMessage = await _botClient.SendTextMessageAsync(
@@ -92,16 +92,24 @@ class Program
         if (mU != null) 
         {
             //TODO: вернуть "!"
-            if (mU.TgMenuMessageId == 0)
+            if (mU.TgMenuMessageId != 0)
             {
                 //проверка по дате, если больше 48 часов, то удаляем
                 //из базы идентификатор и отправляем новый мсж
                 if (mU.DateTimeMessageMenu > DateTime.Now.AddHours(-48))
                 {
-                    //сообщение если нельзя удалить сообщение
+                    //сообщение  можно удалить  
+                    
+                    // удаляем сообщение
+                    try
+                    {
+                        await _botClient.DeleteMessageAsync(mU.TgUserId, Convert.ToInt32(_messageToUser.MessageId), _cancellationToken);
+                    }
+                    catch { WriteLine("Не удалось удалить меню-сообщение"); }
 
                     // отправить новое
                     SentMenuMessage();
+
                     myDB = new DB(_messageFromUser, _messageToUser);
                     // записать его идентификатор в бд
                     myDB.UpdateUser();
@@ -110,11 +118,10 @@ class Program
                 }
                 else
                 {
-                    //собщение можно удалить
+                    //нельзя удалить сообщение
 
                     //TODO: сделать миграцию по смене типа данных у айди меню сообщения на инт
-                    // удаляем сообщение
-                    await _botClient.DeleteMessageAsync(mU.TgUserId,Convert.ToInt32(mU.TgMenuMessageId),_cancellationToken);
+                    
                     // отправить новое
                     SentMenuMessage();
                     // записать новое в бд
