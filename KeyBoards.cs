@@ -8,16 +8,17 @@ namespace SD3_Tg_Bot
         {
             ReplyKeyboardMarkup replyKeyboardMarkup = new(new[]
             {
-                new KeyboardButton[] { "Help me", "Call me ☎️" },
-            })
+                new KeyboardButton[] { "Промпт", "Негативный промпт" },
+                new KeyboardButton[] { "Генерация" }
+            }
+            )
             {
                 ResizeKeyboard = true
             };
-
-
             return replyKeyboardMarkup;
         }
 
+        //клавиатура с главным меню
         public InlineKeyboardMarkup InlineMainMenuKeyBoard()
         {
             InlineKeyboardMarkup inlineKeyboard = new(new[]

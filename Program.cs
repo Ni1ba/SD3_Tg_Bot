@@ -1,12 +1,11 @@
 ﻿using Newtonsoft.Json;
+using SD3_Tg_Bot;
 using System.Text;
-using System.Threading;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
 using static System.Console;
 
 class Program
@@ -52,19 +51,95 @@ class Program
 
 
         WriteLine($"Start listening for @{me.Username}");
-        ReadLine();
-        //WelcomeMsg();
+        try
+        {
+            // ждем, пока токен отмены не будет вызван
+            await Task.Delay(Timeout.Infinite, _cancellationToken);
+        }
+        catch (TaskCanceledException)
+        {
+            // ожидаем завершения работы при отмене
+            WriteLine("Бот остановлен");
+        }
 
         //остановка бота
         _cancellationTokenSource.Cancel();
 
-
-
-        ////usePrompt();
+        //TODO: usePrompt();
     }
+
+    
+    static async Task SentMenuMessage()
+    {
+        Message sentMessage = await _botClient.SendTextMessageAsync(
+            chatId: _messageFromUser.Chat.Id,
+            text: "Menu",
+            cancellationToken: _cancellationToken);
+        _messageToUser=sentMessage;
+    }
+
     static async Task WelcomeMsg()
     {
-        SentKeyBoard();
+        DB myDB = new DB(_messageFromUser);
+        await myDB.AddNewUser();
+        //получение id клавиатуры из базы через пользователя
+        DB.User mU = new DB.User();
+        mU = await myDB.GetUser();
+        Write("");
+        //DateTime dt = DateTime.Now;
+        //DateTime dt2= DateTime.Now.AddHours(-48);
+
+        if (mU != null) 
+        {
+            //TODO: вернуть "!"
+            if (mU.TgMenuMessageId != 0)
+            {
+                //проверка по дате, если больше 48 часов, то удаляем
+                //из базы идентификатор и отправляем новый мсж
+                if (mU.DateTimeMessageMenu > DateTime.Now.AddHours(-48))
+                {
+                    //сообщение  можно удалить  
+                    
+                    // удаляем сообщение
+                    try
+                    {
+                        await _botClient.DeleteMessageAsync(mU.TgUserId, Convert.ToInt32(_messageToUser.MessageId), _cancellationToken);
+                    }
+                    catch { WriteLine("Не удалось удалить меню-сообщение"); }
+
+                    // отправить новое
+                    SentMenuMessage();
+
+                    myDB = new DB(_messageFromUser, _messageToUser);
+                    // записать его идентификатор в бд
+                    myDB.UpdateUser();
+                    
+                    Write("");
+                }
+                else
+                {
+                    //нельзя удалить сообщение
+
+                    //TODO: сделать миграцию по смене типа данных у айди меню сообщения на инт
+                    
+                    // отправить новое
+                    SentMenuMessage();
+                    // записать новое в бд
+                    myDB.UpdateUser();
+
+                }
+                //await _botClient.DeleteMessageAsync(mU.TgUserId,mU.);
+            }
+        }
+
+       //
+        //удаление старого сообщения с клавиатурой
+        //отправка нового сообщения с клавиатурой
+        //запись в базу нового id клавиатуры
+
+
+        //DbCreate();
+        //SentKeyBoard();
     }
 
     //Обработчик введенного пользователем текста
@@ -84,16 +159,10 @@ class Program
 
         if (message.Text == "/start")
         {
-            WelcomeMsg();
-            SentEcho();
+            await WelcomeMsg();
         }
-
         //пока сделаю обнуление сообщения, мб потом уберу
         _messageFromUser = null;
-
-        //
-
-        
     }
 
     //простое эхо сообщение
@@ -105,22 +174,18 @@ class Program
             text: "You said:\n" + _messageFromUser.Text,
             cancellationToken: _cancellationToken);
     }
-    static async Task SentKeyBoard( )
+    static async Task SentKeyBoard()
     {
-        //if (keyboardMarkup == null) return;
-        ReplyKeyboardMarkup replyKeyboardMarkup = new(new[]
-            {
-                new KeyboardButton[] { "Help me", "Call me ☎️" },
-            })
-        {
-            ResizeKeyboard = true
-        };
+        KeyBoards kb = new KeyBoards();
+
 
         Message sentMessage = await _botClient.SendTextMessageAsync(
                 chatId: _messageFromUser.Chat.Id,
                 text: "Choose a response",
-                replyMarkup: replyKeyboardMarkup,
+                replyMarkup: kb.InlineMainMenuKeyBoard(),
                 cancellationToken: _cancellationToken);
+        WriteLine($"Message ID: {sentMessage.MessageId}");
+
     }
     //отправка простого сообщения пользователю
     static async Task SentSimpleMsg(string messageToUser)
@@ -136,8 +201,9 @@ class Program
             cancellationToken: _cancellationToken
             );
 
-    }
 
+    }
+        
     static Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
     {
         var ErrorMessage = exception switch
