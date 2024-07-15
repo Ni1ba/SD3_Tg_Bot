@@ -154,7 +154,7 @@ class Program
     public static string ReturnToken()
     {
         //  TODO: сделать поиск файла с токеном, пока просто абсолютный путь есть 
-        string TokenPath = @"C:\dev\projects\c#\Pets\Bot_SD3\SD3_Tg_Bot\TOKEN.txt";
+        string TokenPath = @"C:\dev\projects\c#\Pets\SD3 TG Bot\TOKEN.txt";
         StreamReader Token = new StreamReader(TokenPath);
         string line = Token.ReadLine();
         return line;
